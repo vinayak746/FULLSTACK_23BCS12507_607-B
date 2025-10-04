@@ -1,0 +1,25 @@
+node_modules/
+.env
+.DS_Store
+dist/
+logs/
+*.log
+coverage/
+.idea/
+.vscode/
+*.iml
+npm-debug.log*
+yarn-error.log
+
+
+
+# MongoDB specific
+data/
+dump/
+restore/
+*.lock
+*.pid
+*.sock
+*.wt
+*.ns
+*.0
