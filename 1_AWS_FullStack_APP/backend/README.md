@@ -17,6 +17,7 @@ Create a `.env` file based on `.env.example` and configure the following:
 - `DB_USER` - Database user
 - `DB_PASSWORD` - Database password
 - `DB_NAME` - Database name
+- `DB_PORT` - Database port (default: 5432 for PostgreSQL)
 
 ## Running the Server
 
@@ -26,4 +27,4 @@ node server.js
 
 ## Description
 
-Express.js backend API with database connectivity.
+Express.js backend API with PostgreSQL database connectivity using connection pooling.
