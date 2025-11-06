@@ -1,0 +1,17 @@
+{
+  "name": "cicd-demo-app",
+  "version": "1.0.0",
+  "description": "Sample Node.js app for CI/CD with GitHub Actions",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "jest",
+    "build": "echo 'Build successful!'"
+  },
+  "keywords": ["ci", "cd", "github-actions"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+}
