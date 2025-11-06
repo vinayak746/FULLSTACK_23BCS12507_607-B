@@ -1,0 +1,129 @@
+# CI/CD Pipeline for Node.js Application (Question 2 Demo)
+# This workflow runs tests and builds the application on push and pull requests
+
+name: Node.js CI/CD Pipeline
+
+# Trigger the workflow on push or pull request events
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '2_CICD_GitHubActions/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '2_CICD_GitHubActions/**'
+  workflow_dispatch:  # Allows manual triggering from GitHub Actions tab
+
+# Define the jobs to run
+jobs:
+  # Job 1: Build and Test
+  build-and-test:
+    name: Build and Test Node.js Application
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 2_CICD_GitHubActions
+
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 20.x]
+        # Test across multiple Node.js versions
+
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js environment
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: '2_CICD_GitHubActions/package-lock.json'
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 4: Run linting (code quality check)
+      - name: Run linter
+        run: npm run lint --if-present
+
+      # Step 5: Run tests
+      - name: Run tests
+        run: npm test
+
+      # Step 6: Build the application
+      - name: Build application
+        run: npm run build --if-present
+
+      # Step 7: Upload build artifacts
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: build-artifacts-node-${{ matrix.node-version }}
+          path: |
+            2_CICD_GitHubActions/dist/
+            2_CICD_GitHubActions/build/
+          retention-days: 5
+
+  # Job 2: Code Quality Analysis
+  code-quality:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 2_CICD_GitHubActions
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: '2_CICD_GitHubActions/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Run code coverage
+      - name: Generate code coverage
+        run: npm run test:coverage --if-present
+
+      # Upload coverage reports
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        if: success()
+        with:
+          files: ./2_CICD_GitHubActions/coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+
+  # Job 3: Security Audit
+  security-audit:
+    name: Security Vulnerability Audit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 2_CICD_GitHubActions
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache-dependency-path: '2_CICD_GitHubActions/package-lock.json'
+
+      # Check for security vulnerabilities
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
